@@ -62,8 +62,8 @@
 
         function update() {
             // Horizontal movement
-            if(keys['ArrowLeft']) player.x -= player.speed;
-            if(keys['ArrowRight']) player.x += player.speed;
+            if(keys['a']) player.x -= player.speed;
+            if(keys['d']) player.x += player.speed;
 
             // Jump
             if(keys['Space'] && player.grounded) {
