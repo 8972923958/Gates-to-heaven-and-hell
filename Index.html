@@ -1,116 +1,37 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fullscreen Platformer</title>
-    <style>
-        html, body {
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
-            height: 100%;
-            background-color: #222;
-        }
-        canvas {
-            display: block;
-            background-color: #333;
-        }
-    </style>
-</head>
-<body>
-    <canvas id="gameCanvas"></canvas>
-    <script>
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
+function update() {
+    // Horizontal movement
+    if(keys['a'] || keys['ArrowLeft']) player.x -= player.speed; // optional: keep A/left arrow
+    if(keys['d'] || keys['ArrowRight']) player.x += player.speed;
 
-        // Make canvas fullscreen
-        function resizeCanvas() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        }
-        window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
+    // Vertical movement
+    if(keys['s'] || keys['ArrowDown']) {
+        // Optional: crouch or drop through platforms
+        // player.y += player.speed; // Only if you want S to move down
+    }
 
-        // Player properties
-        const player = {
-            x: 50,
-            y: canvas.height - 100,
-            width: 50,
-            height: 50,
-            color: 'red',
-            velocityY: 0,
-            speed: 5,
-            jumpPower: 15,
-            grounded: false
-        };
+    // Jump with W
+    if(keys['w'] && player.grounded) {
+        player.velocityY = -player.jumpPower;
+        player.grounded = false;
+    }
 
-        // Gravity
-        const gravity = 0.8;
+    // Apply gravity
+    player.velocityY += gravity;
+    player.y += player.velocityY;
 
-        // Platforms
-        const platforms = [
-            { x: 0, y: canvas.height - 50, width: canvas.width, height: 50 }, // floor
-            { x: 200, y: canvas.height - 200, width: 150, height: 20 },
-            { x: 500, y: canvas.height - 300, width: 150, height: 20 }
-        ];
+    // Collision detection
+    player.grounded = false;
+    platforms.forEach(platform => {
+        if(player.x < platform.x + platform.width &&
+           player.x + player.width > platform.x &&
+           player.y < platform.y + platform.height &&
+           player.y + player.height > platform.y) {
 
-        // Input
-        const keys = {};
-        window.addEventListener('keydown', e => keys[e.code] = true);
-        window.addEventListener('keyup', e => keys[e.code] = false);
-
-        function update() {
-            // Horizontal movement
-            if(keys['a']) player.x -= player.speed;
-            if(keys['d']) player.x += player.speed;
-
-            // Jump
-            if(keys['Space'] && player.grounded) {
-                player.velocityY = -player.jumpPower;
-                player.grounded = false;
+            if(player.velocityY > 0) {
+                player.y = platform.y - player.height;
+                player.velocityY = 0;
+                player.grounded = true;
             }
-
-            // Apply gravity
-            player.velocityY += gravity;
-            player.y += player.velocityY;
-
-            // Collision detection
-            player.grounded = false;
-            platforms.forEach(platform => {
-                if(player.x < platform.x + platform.width &&
-                   player.x + player.width > platform.x &&
-                   player.y < platform.y + platform.height &&
-                   player.y + player.height > platform.y) {
-
-                    if(player.velocityY > 0) {
-                        player.y = platform.y - player.height;
-                        player.velocityY = 0;
-                        player.grounded = true;
-                    }
-                }
-            });
         }
-
-        function draw() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            // Draw platforms
-            ctx.fillStyle = 'green';
-            platforms.forEach(p => ctx.fillRect(p.x, p.y, p.width, p.height));
-
-            // Draw player
-            ctx.fillStyle = player.color;
-            ctx.fillRect(player.x, player.y, player.width, player.height);
-        }
-
-        function gameLoop() {
-            update();
-            draw();
-            requestAnimationFrame(gameLoop);
-        }
-
-        gameLoop();
-    </script>
-</body>
-</html>
+    });
+}
