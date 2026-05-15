@@ -3,34 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Platformer Game</title>
+    <title>Fullscreen Platformer</title>
     <style>
-        body {
+        html, body {
             margin: 0;
-            background-color: #222;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
+            padding: 0;
             overflow: hidden;
+            height: 100%;
+            background-color: #222;
         }
-
         canvas {
-            border: 2px solid #fff;
+            display: block;
             background-color: #333;
         }
     </style>
 </head>
 <body>
-    <canvas id="gameCanvas" width="800" height="600"></canvas>
+    <canvas id="gameCanvas"></canvas>
     <script>
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
+        // Make canvas fullscreen
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
         // Player properties
         const player = {
             x: 50,
-            y: 500,
+            y: canvas.height - 100,
             width: 50,
             height: 50,
             color: 'red',
@@ -45,14 +50,13 @@
 
         // Platforms
         const platforms = [
-            { x: 0, y: 550, width: 800, height: 50 }, // floor
-            { x: 200, y: 400, width: 150, height: 20 },
-            { x: 500, y: 300, width: 150, height: 20 }
+            { x: 0, y: canvas.height - 50, width: canvas.width, height: 50 }, // floor
+            { x: 200, y: canvas.height - 200, width: 150, height: 20 },
+            { x: 500, y: canvas.height - 300, width: 150, height: 20 }
         ];
 
         // Input
         const keys = {};
-
         window.addEventListener('keydown', e => keys[e.code] = true);
         window.addEventListener('keyup', e => keys[e.code] = false);
 
@@ -79,7 +83,6 @@
                    player.y < platform.y + platform.height &&
                    player.y + player.height > platform.y) {
 
-                    // Collision from above
                     if(player.velocityY > 0) {
                         player.y = platform.y - player.height;
                         player.velocityY = 0;
